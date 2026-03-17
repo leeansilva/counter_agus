@@ -1,7 +1,6 @@
 import { format, getISOWeek, getYear } from 'date-fns';
 
-const API_BASE_URL = 'https://api.counterapi.dev/v1';
-const NAMESPACE = 'oca_contador_agus_teams_v2';
+const API_BASE_URL = '/api';
 
 const getKeys = () => {
     const now = new Date();
@@ -22,7 +21,7 @@ export interface CounterStats {
 
 export const fetchCount = async (key: string): Promise<number> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/${NAMESPACE}/${key}`);
+        const response = await fetch(`${API_BASE_URL}/${key}`);
         if (!response.ok) return 0;
         const data = await response.json();
         return data.count || 0;
@@ -33,7 +32,7 @@ export const fetchCount = async (key: string): Promise<number> => {
 
 export const incrementCount = async (key: string): Promise<number> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/${NAMESPACE}/${key}/up`);
+        const response = await fetch(`${API_BASE_URL}/${key}/up`);
         if (!response.ok) return 0;
         const data = await response.json();
         return data.count || 0;
