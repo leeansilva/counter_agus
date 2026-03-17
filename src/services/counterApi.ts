@@ -1,7 +1,7 @@
 import { format, getISOWeek, getYear } from 'date-fns';
 
 const API_BASE_URL = 'https://api.counterapi.dev/v1';
-const NAMESPACE = 'oca_contador_agus_teams';
+const NAMESPACE = 'oca_contador_agus_teams_v2';
 
 const getKeys = () => {
     const now = new Date();
@@ -23,11 +23,10 @@ export interface CounterStats {
 export const fetchCount = async (key: string): Promise<number> => {
     try {
         const response = await fetch(`${API_BASE_URL}/${NAMESPACE}/${key}`);
+        if (!response.ok) return 0;
         const data = await response.json();
-        console.log(data);
         return data.count || 0;
     } catch (error) {
-        console.error(`Error fetching count for ${key}:`, error);
         return 0;
     }
 };
@@ -35,22 +34,20 @@ export const fetchCount = async (key: string): Promise<number> => {
 export const incrementCount = async (key: string): Promise<number> => {
     try {
         const response = await fetch(`${API_BASE_URL}/${NAMESPACE}/${key}/up`);
+        if (!response.ok) return 0;
         const data = await response.json();
         return data.count || 0;
     } catch (error) {
-        console.error(`Error incrementing count for ${key}:`, error);
         return 0;
     }
 };
 
 export const getStats = async (): Promise<CounterStats> => {
     const keys = getKeys();
-    const [total, daily, weekly, monthly] = await Promise.all([
-        fetchCount(keys.total),
-        fetchCount(keys.daily),
-        fetchCount(keys.weekly),
-        fetchCount(keys.monthly),
-    ]);
+    const total = await fetchCount(keys.total);
+    const daily = await fetchCount(keys.daily);
+    const weekly = await fetchCount(keys.weekly);
+    const monthly = await fetchCount(keys.monthly);
 
     return { total, daily, weekly, monthly };
 };
@@ -76,13 +73,15 @@ export const getYearlyStats = async (): Promise<MonthlyStat[]> => {
     const now = new Date();
     const year = getYear(now);
     const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const results: MonthlyStat[] = [];
 
-    const promises = monthNames.map(async (month, index) => {
-        const monthStr = String(index + 1).padStart(2, '0');
+    for (let i = 0; i < monthNames.length; i++) {
+        const month = monthNames[i];
+        const monthStr = String(i + 1).padStart(2, '0');
         const key = `clicks_${year}_${monthStr}`;
         const count = await fetchCount(key);
-        return { month, count };
-    });
+        results.push({ month, count });
+    }
 
-    return Promise.all(promises);
+    return results;
 };
