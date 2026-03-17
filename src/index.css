@@ -1,0 +1,10 @@
+:root {
+  --rs-primary-500: #5B2B82;
+  --rs-btn-primary-bg: #5B2B82;
+  --rs-btn-primary-hover-bg: #4a2368;
+}
+
+body {
+  background-color: #EEE9F2;
+  font-family: 'Fira Sans', 'Montserrat', sans-serif;
+}
